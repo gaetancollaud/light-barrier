@@ -17,5 +17,5 @@ void loop(){
   unsigned long now = millis();
 
   lightBarrier.loop(now);
-  digitalWrite(PIN_LED, lightBarrier.isCalibrated() ? HIGH : LOW);
+  digitalWrite(PIN_LED, lightBarrier.isObstacle() ? HIGH : LOW);
 }

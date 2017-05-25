@@ -19,20 +19,23 @@ void LightBarrier::checkLaser(unsigned long now){
       if(laserOn){
         int readOn = analogRead(PIN_LIGHT_SENSOR);
         digitalWrite(PIN_LASER, LOW);
+        laserOn = false;
 
         if(!calibrated || abs(normalOn-readOn)<abs(normalOff-readOn)){
           //clear or init
           sumOn += readOn;
           sumOff += lastReadOff;
           count++;
+
+          obstacle = false;
         }else{
           //something in the way
-          Serial.println("Something in the way");
+          obstacle = true;
         }
       }else{
         lastReadOff = analogRead(PIN_LIGHT_SENSOR);
         digitalWrite(PIN_LASER, HIGH);
-
+        laserOn = true;
       }
 
     }
@@ -52,56 +55,30 @@ float LightBarrier::getDiffPercent(){
   return 100.0*diff/1024;
 }
 
-// bool LightBarrier::inSight(bool init){
-//   digitalWrite(PIN_LASER, HIGH);
-//   delay(PULSE_DELAY_MS);
-//   int readOn = analogRead(PIN_LIGHT_SENSOR);
-//
-//   digitalWrite(PIN_LASER, LOW);
-//   delay(PULSE_DELAY_MS);
-//   int readOff = analogRead(PIN_LIGHT_SENSOR);
-//
-//   if(init || abs(normalOn-readOn)<abs(normalOff-readOn)){
-//     //clear or init
-//     sumOn += readOn;
-//     sumOff += readOff;
-//     count++;
-//   }else{
-//     //something in the way
-//     Serial.println("Something in the way");
-//   }
-// }
-
 void LightBarrier::checkCalibration(unsigned long now){
   if(nextTimeCalibration<=now){
     nextTimeCalibration = now + 500;
     if(count>0){
       computeNormal();
-
       float percent = getDiffPercent();
       calibrated = percent>DIFF_TOLERANCE_PERCENT;
 
 #ifdef DEBUG_LIGHT_BARRIER
-      Serial.print(count);
+      Serial.print(normalOff);
       Serial.print("\t");
-      Serial.print(sumOn);
-      Serial.print("\t");
-      Serial.print(sumOff);
-
-      Serial.print("\t\t");
       Serial.print(normalOn);
       Serial.print("\t");
       Serial.print(percent);
       Serial.print("%\t");
       Serial.println(calibrated);
 #endif
-
-
-
     }
   }
 }
 
 bool LightBarrier::isCalibrated(){
   return this->calibrated;
+}
+bool LightBarrier::isObstacle(){
+  return this->obstacle;
 }
