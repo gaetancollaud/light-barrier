@@ -1,1 +1,1 @@
-# light-barrier-node
+# Bight Barrier
