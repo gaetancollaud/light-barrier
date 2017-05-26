@@ -1,5 +1,4 @@
 #include "light-barrier.h"
-#include <Arduino.h>
 
 void LightBarrier::init(){
   pinMode(PIN_LIGHT_SENSOR, INPUT_PULLUP);

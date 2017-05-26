@@ -1,6 +1,7 @@
 #ifndef _LIGHT_BARRIER_H
 #define _LIGHT_BARRIER_H
 
+#include <Arduino.h>
 
 #define PIN_LIGHT_SENSOR A0
 #define PIN_LASER 7
