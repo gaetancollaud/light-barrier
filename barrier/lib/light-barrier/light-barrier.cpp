@@ -1,8 +1,13 @@
 #include "light-barrier.h"
 
+
+LightBarrier::LightBarrier(int pinLaser, int pinLightSensor) : pinLaser(pinLaser), pinLightSensor(pinLightSensor) {
+
+}
+
 void LightBarrier::init(){
-  pinMode(PIN_LIGHT_SENSOR, INPUT_PULLUP);
-  pinMode(PIN_LASER, OUTPUT);
+  pinMode(pinLightSensor, INPUT_PULLUP);
+  pinMode(pinLaser, OUTPUT);
   this->nextLaserChange = millis();
 }
 
@@ -16,8 +21,8 @@ void LightBarrier::checkLaser(unsigned long now){
       nextLaserChange += PULSE_DELAY_MS;
 
       if(laserOn){
-        int readOn = analogRead(PIN_LIGHT_SENSOR);
-        digitalWrite(PIN_LASER, LOW);
+        int readOn = analogRead(pinLightSensor);
+        digitalWrite(pinLaser, LOW);
         laserOn = false;
 
         if(!calibrated || abs(normalOn-readOn)<abs(normalOff-readOn)){
@@ -32,8 +37,8 @@ void LightBarrier::checkLaser(unsigned long now){
           obstacle = true;
         }
       }else{
-        lastReadOff = analogRead(PIN_LIGHT_SENSOR);
-        digitalWrite(PIN_LASER, HIGH);
+        lastReadOff = analogRead(pinLightSensor);
+        digitalWrite(pinLaser, HIGH);
         laserOn = true;
       }
 

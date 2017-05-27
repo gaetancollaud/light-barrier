@@ -2,18 +2,21 @@
 #define MY_DEBUG
 #define MY_RADIO_NRF24
 #define BARRIER_SENSOR_ID 10
+#define BARRIER_ACCURACY_ID 11
+
+#define PIN_LIGHT_SENSOR A0
+#define PIN_LASER 7
 
 #include <Arduino.h>
 #include <light-barrier.h>
 #include <led-status.h>
 #include <MySensors.h>
 
-LightBarrier lightBarrier;
+LightBarrier lightBarrier(PIN_LASER, PIN_LIGHT_SENSOR);
 LedStatus ledStatus(&lightBarrier, LED_BUILTIN);
 
-
 MyMessage msgBarrier(BARRIER_SENSOR_ID, V_STATUS);
-MyMessage msgCalibration(BARRIER_CALIBRATION_ID, V_LEVEL);
+MyMessage msgAccuracy(BARRIER_ACCURACY_ID, V_LEVEL);
 
 void presentation(){
 	sendSketchInfo("LightBarrier", "1.0");
@@ -28,12 +31,20 @@ void setup(){
 }
 
 bool lastObstacle = false;
-void checkSendMessage(){
+void checkSendMessageObstacle(){
   bool obstacle = lightBarrier.isObstacle();
   if(lastObstacle!=obstacle){
     lastObstacle = obstacle;
     send(msgBarrier.set(obstacle));
   }
+}
+
+unsigned long nextAccuracy = 0;
+void checkSendMessageAccuracy(unsigned long now){
+	if(now>nextAccuracy){
+		nextAccuracy = now + 10000;
+		send(msgAccuracy.set(lightBarrier.getDiffPercent(), 1));
+	}
 }
 
 
@@ -43,5 +54,6 @@ void loop(){
   lightBarrier.loop(now);
   ledStatus.loop(now);
 
-  checkSendMessage();
+  checkSendMessageObstacle();
+  checkSendMessageAccuracy(now);
 }

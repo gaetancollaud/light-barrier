@@ -3,14 +3,13 @@
 
 #include <Arduino.h>
 
-#define PIN_LIGHT_SENSOR A0
-#define PIN_LASER 7
-#define PULSE_DELAY_MS 10
+#define PULSE_DELAY_MS 5
 #define DIFF_TOLERANCE_PERCENT 2
 #define DEBUG_LIGHT_BARRIER
 
 class LightBarrier {
 public:
+  LightBarrier(int pinLaser, int pinLightSensor);
   void init();
   void loop(unsigned long now);
 
@@ -19,6 +18,9 @@ public:
   float getDiffPercent();
 
 private:
+  int pinLaser;
+  int pinLightSensor;
+
   unsigned long nextTimeCalibration = 0;
   unsigned long nextLaserChange=0;
 
