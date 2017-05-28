@@ -3,9 +3,9 @@
 
 #include <Arduino.h>
 
-#define PULSE_DELAY_MS 5
+#define PULSE_DELAY_MS 10
 #define DIFF_TOLERANCE_PERCENT 2
-#define DEBUG_LIGHT_BARRIER
+// #define DEBUG_LIGHT_BARRIER
 
 class LightBarrier {
 public:
@@ -16,6 +16,7 @@ public:
   bool isCalibrated();
   bool isObstacle();
   float getDiffPercent();
+  void skipNextMs(int ms);
 
 private:
   int pinLaser;
@@ -24,6 +25,7 @@ private:
   unsigned long nextTimeCalibration = 0;
   unsigned long nextLaserChange=0;
 
+  int skipNextMsCount = 0;
   int normalOff = 1024;
   int normalOn = 0;
   long sumOff = 0;

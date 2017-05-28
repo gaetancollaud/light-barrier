@@ -17,46 +17,55 @@ void LightBarrier::loop(unsigned long now){
 }
 
 void LightBarrier::checkLaser(unsigned long now){
-    if(nextLaserChange<=now){
-      nextLaserChange += PULSE_DELAY_MS;
+    if(this->nextLaserChange<=now){
+      this->nextLaserChange += PULSE_DELAY_MS;
 
-      if(laserOn){
-        int readOn = analogRead(pinLightSensor);
-        digitalWrite(pinLaser, LOW);
-        laserOn = false;
-
-        if(!calibrated || abs(normalOn-readOn)<abs(normalOff-readOn)){
-          //clear or init
-          sumOn += readOn;
-          sumOff += lastReadOff;
-          count++;
-
-          obstacle = false;
-        }else{
-          //something in the way
-          obstacle = true;
-        }
+      if(this->skipNextMsCount>0){
+        this->skipNextMsCount-= PULSE_DELAY_MS;
       }else{
-        lastReadOff = analogRead(pinLightSensor);
-        digitalWrite(pinLaser, HIGH);
-        laserOn = true;
-      }
+        if(laserOn){
+          int readOn = analogRead(pinLightSensor);
+          digitalWrite(pinLaser, LOW);
+          laserOn = false;
 
+          if(!calibrated || abs(normalOn-readOn)<abs(normalOff-readOn)){
+            //clear or init
+            sumOn += readOn;
+            sumOff += lastReadOff;
+            count++;
+
+            obstacle = false;
+          }else{
+            //something in the way
+            obstacle = true;
+          }
+        }else{
+          lastReadOff = analogRead(pinLightSensor);
+          digitalWrite(pinLaser, HIGH);
+          laserOn = true;
+        }
+      }
     }
 }
 
 void LightBarrier::computeNormal(){
-    normalOff = sumOff/count;
-    normalOn = sumOn/count;
+  float countReverse = 1.0/count;
+  normalOff = sumOff*countReverse;
+  normalOn = sumOn*countReverse;
 
-    count = 0;
-    sumOff = 0;
-    sumOn = 0;
+  count = 0;
+  sumOff = 0;
+  sumOn = 0;
 }
 
 float LightBarrier::getDiffPercent(){
   int diff = normalOff-normalOn;
-  return 100.0*diff/1024;
+  if(diff == 1024){
+    //no value yet
+    return 0.0;
+  }else{
+    return 100.0*diff/1024;
+  }
 }
 
 void LightBarrier::checkCalibration(unsigned long now){
@@ -85,4 +94,8 @@ bool LightBarrier::isCalibrated(){
 }
 bool LightBarrier::isObstacle(){
   return this->obstacle;
+}
+
+void LightBarrier::skipNextMs(int ms){
+  this->skipNextMsCount = ms;
 }

@@ -7,6 +7,8 @@
 #define PIN_LIGHT_SENSOR A0
 #define PIN_LASER 7
 
+#define ACCURACY_SEND_DELAY_MS 1000
+
 #include <Arduino.h>
 #include <light-barrier.h>
 #include <led-status.h>
@@ -42,8 +44,9 @@ void checkSendMessageObstacle(){
 unsigned long nextAccuracy = 0;
 void checkSendMessageAccuracy(unsigned long now){
 	if(now>nextAccuracy){
-		nextAccuracy = now + 10000;
+		nextAccuracy = now + ACCURACY_SEND_DELAY_MS;
 		send(msgAccuracy.set(lightBarrier.getDiffPercent(), 1));
+		lightBarrier.skipNextMs(20);
 	}
 }
 
